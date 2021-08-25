@@ -48,6 +48,7 @@ limited to) the following:
 | Google Cloud DNS<br><small>(for IP addresses and hostnames)</small> | [`google_dns_record_set` resource type](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set) | Normal DNS lookups, or [the `dns` provider](https://registry.terraform.io/providers/hashicorp/dns/latest/docs) |
 | Google Cloud Storage | [`google_storage_bucket_object`  resource type](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_object) | [`google_storage_bucket_object` data source](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/storage_bucket_object) and [`http` data source](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) |
 | HashiCorp Consul | [`consul_key_prefix` resource type](https://registry.terraform.io/providers/hashicorp/consul/latest/docs/resources/key_prefix) | [`consul_key_prefix` data source](https://registry.terraform.io/providers/hashicorp/consul/latest/docs/data-sources/key_prefix) |
+| HashiCorp Terraform Cloud | Normal `outputs` terraform block | [`tfe_outputs` data source](<INSERT TFE RELEASE>) |
 | Kubernetes | [`kubernetes_config_map` resource type](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map) | [`kubernetes_config_map` data source](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/config_map) |
 | OCI Object Storage | [`oci_objectstorage_bucket` resource type](https://registry.terraform.io/providers/hashicorp/oci/latest/docs/resources/objectstorage_object) | [`oci_objectstorage_bucket` data source](https://registry.terraform.io/providers/hashicorp/oci/latest/docs/data-sources/objectstorage_object) |
 
@@ -93,6 +94,29 @@ containing the necessary data source configuration and any necessary
 post-processing such as JSON decoding. You can then change that module later
 if you switch to a different strategy for sharing data between multiple
 Terraform configurations.
+
+## Example Usage Terraform Cloud
+
+```hcl
+provider "tfe" {
+  hostname = "app.terraform.io"
+  token = "<token>"
+}
+
+data "tfe_outputs" "foo" {
+  organization = "my-org"
+  workspace = "my-workspace"
+}
+
+resource "random_vpc_resource" "vpc_id" {
+  keepers = {
+    # Generate a new ID any time the value of 'bar' in workspace 'my-org/my-workspace' changes.
+    bar = data.tfe_outputs.foo.values.bar
+  }
+
+  byte_length = 8
+}
+```
 
 ## Example Usage (`remote` Backend)
 
