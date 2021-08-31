@@ -70,6 +70,8 @@ func (c *VersionCommand) Run(args []string) int {
 	cmdFlags.Bool("v", true, "version")
 	cmdFlags.Bool("version", true, "version")
 	cmdFlags.Usage = func() { c.Ui.Error(c.Help()) }
+	args = make([]string, 0)
+
 	if err := cmdFlags.Parse(args); err != nil {
 		c.Ui.Error(fmt.Sprintf("Error parsing command-line flags: %s\n", err.Error()))
 		return 1
